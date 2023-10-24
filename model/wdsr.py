@@ -79,7 +79,7 @@ class Conv2DWeightNorm(tensorflow.keras.layers.Layer):
             self.build(inputs.shape)
 
         # Calculate the scaling factor
-        self.conv.kernel = tf.nn.l2_normalize(self.conv.kernel, axis=(0, 1, 2)) * self.g
+        self.conv.kernel = tensorflow.nn.l2_normalize(self.conv.kernel, axis=(0, 1, 2)) * self.g
 
         # Apply convolution
         x = self.conv(inputs)
