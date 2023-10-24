@@ -57,7 +57,7 @@ def res_block_b(x_in, num_filters, expansion, kernel_size, scaling):
     x = Add()([x_in, x])
     return x
 
-class Conv2DWeightNorm(tf.keras.layers.Layer):
+class Conv2DWeightNorm(tensorflow.keras.layers.Layer):
     def __init__(self, filters, kernel_size, padding='same', activation=None, **kwargs):
         super(Conv2DWeightNorm, self).__init__()
         
