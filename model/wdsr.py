@@ -22,14 +22,14 @@ def wdsr(scale, num_filters, num_res_blocks, res_block_expansion, res_block_scal
     x = Lambda(normalize)(x_in)
 
     # main branch
-    m = conv2d_weightnorm(num_filters, 3, padding='same')(x)
+    m = Conv2DWeightNorm(num_filters, 3, padding='same')(x)
     for i in range(num_res_blocks):
         m = res_block(m, num_filters, res_block_expansion, kernel_size=3, scaling=res_block_scaling)
-    m = conv2d_weightnorm(3 * scale ** 2, 3, padding='same', name=f'conv2d_main_scale_{scale}')(m)
+    m = Conv2DWeightNorm(3 * scale ** 2, 3, padding='same', name=f'conv2d_main_scale_{scale}')(m)
     m = Lambda(pixel_shuffle(scale))(m)
 
     # skip branch
-    s = conv2d_weightnorm(3 * scale ** 2, 5, padding='same', name=f'conv2d_skip_scale_{scale}')(x)
+    s = Conv2DWeightNorm(3 * scale ** 2, 5, padding='same', name=f'conv2d_skip_scale_{scale}')(x)
     s = Lambda(pixel_shuffle(scale))(s)
 
     x = Add()([m, s])
@@ -39,8 +39,8 @@ def wdsr(scale, num_filters, num_res_blocks, res_block_expansion, res_block_scal
 
 
 def res_block_a(x_in, num_filters, expansion, kernel_size, scaling):
-    x = conv2d_weightnorm(num_filters * expansion, kernel_size, padding='same', activation='relu')(x_in)
-    x = conv2d_weightnorm(num_filters, kernel_size, padding='same')(x)
+    x = Conv2DWeightNorm(num_filters * expansion, kernel_size, padding='same', activation='relu')(x_in)
+    x = Conv2DWeightNorm(num_filters, kernel_size, padding='same')(x)
     if scaling:
         x = Lambda(lambda t: t * scaling)(x)
     x = Add()([x_in, x])
@@ -49,37 +49,47 @@ def res_block_a(x_in, num_filters, expansion, kernel_size, scaling):
 
 def res_block_b(x_in, num_filters, expansion, kernel_size, scaling):
     linear = 0.8
-    x = conv2d_weightnorm(num_filters * expansion, 1, padding='same', activation='relu')(x_in)
-    x = conv2d_weightnorm(int(num_filters * linear), 1, padding='same')(x)
-    x = conv2d_weightnorm(num_filters, kernel_size, padding='same')(x)
+    x = Conv2DWeightNorm(num_filters * expansion, 1, padding='same', activation='relu')(x_in)
+    x = Conv2DWeightNorm(int(num_filters * linear), 1, padding='same')(x)
+    x = Conv2DWeightNorm(num_filters, kernel_size, padding='same')(x)
     if scaling:
         x = Lambda(lambda t: t * scaling)(x)
     x = Add()([x_in, x])
     return x
 
-def conv2d_weightnorm(filters, kernel_size, padding='same', activation=None, **kwargs):
-    # Create a standard Conv2D layer
-    conv_layer = Conv2D(filters, kernel_size, padding=padding, activation=None, **kwargs)
-    
-    # Initialize weights using VarianceScaling
-    conv_layer.kernel_initializer = VarianceScaling(scale=2.0, mode='fan_in', distribution='truncated_normal')
-    
-    # Apply weight normalization to the Conv2D layer
-    def custom_forward(x):
-        # Apply convolution operation
-        output = conv_layer(x)
+class Conv2DWeightNorm(tf.keras.layers.Layer):
+    def __init__(self, filters, kernel_size, padding='same', activation=None, **kwargs):
+        super(Conv2DWeightNorm, self).__init__()
         
-        # Calculate the norm of the weights
-        weight_norm = K.sqrt(K.sum(K.square(conv_layer.kernel)))
-        
-        # Normalize the weights
-        normalized_weights = conv_layer.kernel / weight_norm
-        
-        # Update the Conv2D layer's kernel with the normalized weights
-        conv_layer.kernel = normalized_weights
-        
-        return output
+        self.conv = Conv2D(filters, kernel_size, padding=padding, activation=None, **kwargs)
+        self.conv.kernel_initializer = VarianceScaling(scale=2.0, mode='fan_in', distribution='truncated_normal')
+        self.data_init = False
 
-    return custom_forward
+    def build(self, input_shape):
+        input_dim = input_shape[-1]
+        self.conv.build(input_shape)
+        
+        # Create the scaling and bias variables for weight normalization
+        self.g = self.add_weight(shape=(input_dim,), initializer="ones", name="g", trainable=True)
+        self.b = self.add_weight(shape=(input_dim,), initializer="zeros", name="b", trainable=True)
+        self.initialized = True
+
+    def call(self, inputs):
+        if not self.initialized:
+            self.build(inputs.shape)
+
+        # Calculate the scaling factor
+        self.conv.kernel = tf.nn.l2_normalize(self.conv.kernel, axis=(0, 1, 2)) * self.g
+
+        # Apply convolution
+        x = self.conv(inputs)
+
+        # Apply bias
+        x = x + self.b
+
+        if self.conv.activation is not None:
+            x = self.conv.activation(x)
+
+        return x
 # def conv2d_weightnorm(filters, kernel_size, padding='same', activation=None, **kwargs):
 #     return tfa.layers.WeightNormalization(Conv2D(filters, kernel_size, padding=padding, activation=activation, **kwargs), data_init=False)
