@@ -1,7 +1,9 @@
-import tensorflow_addons as tfa
+# import tensorflow_addons as tfa
 
 from tensorflow.python.keras.layers import Add, Conv2D, Input, Lambda
 from tensorflow.python.keras.models import Model
+
+from tensorflow.keras.initializers import VarianceScaling
 
 from model.common import normalize, denormalize, pixel_shuffle
 
@@ -54,6 +56,29 @@ def res_block_b(x_in, num_filters, expansion, kernel_size, scaling):
     x = Add()([x_in, x])
     return x
 
-
 def conv2d_weightnorm(filters, kernel_size, padding='same', activation=None, **kwargs):
-    return tfa.layers.WeightNormalization(Conv2D(filters, kernel_size, padding=padding, activation=activation, **kwargs), data_init=False)
+    # Create a standard Conv2D layer
+    conv_layer = Conv2D(filters, kernel_size, padding=padding, activation=None, **kwargs)
+    
+    # Initialize weights using VarianceScaling
+    conv_layer.kernel_initializer = VarianceScaling(scale=2.0, mode='fan_in', distribution='truncated_normal')
+    
+    # Apply weight normalization to the Conv2D layer
+    def custom_forward(x):
+        # Apply convolution operation
+        output = conv_layer(x)
+        
+        # Calculate the norm of the weights
+        weight_norm = K.sqrt(K.sum(K.square(conv_layer.kernel)))
+        
+        # Normalize the weights
+        normalized_weights = conv_layer.kernel / weight_norm
+        
+        # Update the Conv2D layer's kernel with the normalized weights
+        conv_layer.kernel = normalized_weights
+        
+        return output
+
+    return custom_forward
+# def conv2d_weightnorm(filters, kernel_size, padding='same', activation=None, **kwargs):
+#     return tfa.layers.WeightNormalization(Conv2D(filters, kernel_size, padding=padding, activation=activation, **kwargs), data_init=False)
