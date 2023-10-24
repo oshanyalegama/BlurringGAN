@@ -57,10 +57,9 @@ def res_block_b(x_in, num_filters, expansion, kernel_size, scaling):
     x = Add()([x_in, x])
     return x
 
-class Conv2DWeightNorm(tensorflow.keras.layers.Layer):
+class Conv2DWeightNorm(tf.keras.layers.Layer):
     def __init__(self, filters, kernel_size, padding='same', activation=None, **kwargs):
         super(Conv2DWeightNorm, self).__init__()
-        
         self.conv = Conv2D(filters, kernel_size, padding=padding, activation=None, **kwargs)
         self.conv.kernel_initializer = VarianceScaling(scale=2.0, mode='fan_in', distribution='truncated_normal')
         self.data_init = False
@@ -69,9 +68,8 @@ class Conv2DWeightNorm(tensorflow.keras.layers.Layer):
         input_dim = input_shape[-1]
         self.conv.build(input_shape)
         
-        # Create the scaling and bias variables for weight normalization
-        self.g = self.add_weight(shape=(input_dim,), initializer="ones", name="g", trainable=True)
-        self.b = self.add_weight(shape=(input_dim,), initializer="zeros", name="b", trainable=True)
+        # Create the scaling variable for weight normalization
+        self.g = self.add_weight(shape=(1, 1, 1, input_dim), initializer="ones", name="g", trainable=True)
         self.initialized = True
 
     def call(self, inputs):
@@ -79,13 +77,10 @@ class Conv2DWeightNorm(tensorflow.keras.layers.Layer):
             self.build(inputs.shape)
 
         # Calculate the scaling factor
-        self.conv.kernel = tensorflow.nn.l2_normalize(self.conv.kernel, axis=(0, 1, 2)) * self.g
+        self.conv.kernel = self.conv.kernel * self.g
 
         # Apply convolution
         x = self.conv(inputs)
-
-        # Apply bias
-        x = x + self.b
 
         if self.conv.activation is not None:
             x = self.conv.activation(x)
