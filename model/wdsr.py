@@ -4,6 +4,7 @@ from tensorflow.python.keras.layers import Add, Conv2D, Input, Lambda
 from tensorflow.python.keras.models import Model
 
 from tensorflow.keras.initializers import VarianceScaling
+from tensorflow.keras import backend as K
 
 from model.common import normalize, denormalize, pixel_shuffle
 
