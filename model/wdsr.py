@@ -1,5 +1,5 @@
 # import tensorflow_addons as tfa
-import tensorflow
+import tensorflow as tf
 from tensorflow.python.keras.layers import Add, Conv2D, Input, Lambda
 from tensorflow.python.keras.models import Model
 
