@@ -106,6 +106,7 @@ class EdsrTrainer(Trainer):
         super().__init__(model, loss=MeanAbsoluteError(), learning_rate=learning_rate, checkpoint_dir=checkpoint_dir)
 
     def train(self, train_dataset, valid_dataset, steps=300000, evaluate_every=1000, save_best_only=True):
+        print('hey pal')
         super().train(train_dataset, valid_dataset, steps, evaluate_every, save_best_only)
 
 
