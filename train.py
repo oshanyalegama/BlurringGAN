@@ -49,10 +49,10 @@ class Trainer:
         for lr, hr in train_dataset.take(steps - ckpt.step.numpy()):
             ckpt.step.assign_add(1)
             step = ckpt.step.numpy()
-
+            print('hey')
             loss = self.train_step(lr, hr)
             loss_mean(loss)
-            print('hey')
+            
             
 
             if step % evaluate_every == 0:
