@@ -32,7 +32,7 @@ def wdsr(scale, num_filters, num_res_blocks, res_block_expansion, res_block_scal
     x = Add()([m, s])
     x = Lambda(denormalize)(x)
 
-    return Model(x_in, x, name="wdsr")
+    return Model(x_in, x, name="wdsr", run_eagerly= True)
 
 
 def res_block_a(x_in, num_filters, expansion, kernel_size, scaling):
