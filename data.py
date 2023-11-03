@@ -29,7 +29,7 @@ class DIV2K:
             raise ValueError("subset must be 'train' or 'valid'")
 
         _downgrades_a = ['bicubic', 'unknown']
-        _downgrades_b = ['mild', 'difficult']
+        _downgrades_b = ['mild', 'difficult','wild']
 
         if scale == 8 and downgrade != 'bicubic':
             raise ValueError(f'scale 8 only allowed for bicubic downgrade')
