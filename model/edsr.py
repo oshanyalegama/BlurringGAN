@@ -45,6 +45,6 @@ def upsample(x, scale, num_filters):
     elif scale == 8:
         x = upsample_1(x, 2, name='conv2d_1_scale_8')
         x = upsample_1(x, 2, name='conv2d_2_scale_8')
-        x = upsample_1(x, 2, name='conv2d_2_scale_8')
+        x = upsample_1(x, 2, name='conv2d_3_scale_8')
 
     return x
