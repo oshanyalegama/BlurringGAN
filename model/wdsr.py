@@ -1,7 +1,7 @@
 import tensorflow_addons as tfa
 import tensorflow_probability as tfp
-from tensorflow.python.keras.layers import Add, Conv2D, Input, Lambda
-from tensorflow.python.keras.models import Model
+from tensorflow.keras.layers import Add, Conv2D, Input, Lambda
+from tensorflow.keras.models import Model
 
 from model.common import normalize, denormalize, pixel_shuffle
 
@@ -32,7 +32,7 @@ def wdsr(scale, num_filters, num_res_blocks, res_block_expansion, res_block_scal
     x = Add()([m, s])
     x = Lambda(denormalize)(x)
 
-    return Model(x_in, x, name="wdsr", run_eagerly= True)
+    return Model(x_in, x, name="wdsr")
 
 
 def res_block_a(x_in, num_filters, expansion, kernel_size, scaling):
