@@ -1,5 +1,5 @@
 import tensorflow_addons as tfa
-
+import tensorflow_probability as tfp
 from tensorflow.python.keras.layers import Add, Conv2D, Input, Lambda
 from tensorflow.python.keras.models import Model
 
@@ -56,4 +56,6 @@ def res_block_b(x_in, num_filters, expansion, kernel_size, scaling):
 
 
 def conv2d_weightnorm(filters, kernel_size, padding='same', activation=None, **kwargs):
-    return tfa.layers.WeightNormalization(Conv2D(filters, kernel_size, padding=padding, activation=activation, **kwargs), data_init=False)
+    return tfp.layers.weight_norm.WeightNorm(Conv2D(filters, kernel_size, padding=padding,
+                                                 activation=activation, **kwargs), 
+                                             data_init=False)
