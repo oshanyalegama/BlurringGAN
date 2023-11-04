@@ -54,7 +54,7 @@ class Trainer:
             loss_mean(loss)
             
             
-            print(step)
+            
             if step % evaluate_every == 0:
                 loss_value = loss_mean.result()
                 loss_mean.reset_states()
