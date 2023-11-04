@@ -83,6 +83,7 @@ class Trainer:
 
             sr = self.checkpoint.model(lr, training=True)
             loss_value = self.loss(hr, sr)
+            print(hr,sr)
 
         gradients = tape.gradient(loss_value, self.checkpoint.model.trainable_variables)
         self.checkpoint.optimizer.apply_gradients(zip(gradients, self.checkpoint.model.trainable_variables))
