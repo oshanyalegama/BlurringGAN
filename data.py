@@ -152,6 +152,14 @@ class DIV2K:
 
 
 def random_crop(lr_img, hr_img, hr_crop_size=96, scale=2):
+
+    lr_shape = lr_img.shape
+    hr_shape = hr_img.shape
+
+    print("Shape of lr_img:", lr_shape)
+    print("Shape of hr_img:", hr_shape)
+
+    
     lr_crop_size = hr_crop_size // scale
     lr_img_shape = tf.shape(lr_img)[:2]
 
