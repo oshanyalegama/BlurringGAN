@@ -60,10 +60,28 @@ def denormalize_m11(x):
 # ---------------------------------------
 
 
-def psnr(x1, x2):
-    if x1.shape.as_list() != x2.shape.as_list():
-        x1 = tf.image.resize_with_pad(x1, x2.shape[1], x2.shape[2])
-    return tf.image.psnr(x1, x2, max_val=255)
+# def psnr(x1, x2):
+#     if x1.shape.as_list() != x2.shape.as_list():
+#         x1 = tf.image.resize_with_pad(x1, x2.shape[1], x2.shape[2])
+#     return tf.image.psnr(x1, x2, max_val=255)
+
+# Ensure both images have the same shape and data type
+def psnr(original,reconstructed):
+    if original.shape != reconstructed.shape:
+        original_height, original_width, _ = original.shape
+        reconstructed = np.array(Image.fromarray(reconstructed).resize((original_width, original_height)))
+    # Calculate the Mean Squared Error (MSE) between the two images
+    mse = np.mean((original - reconstructed) ** 2)
+    
+    # If the MSE is very close to zero, return a high PSNR value (e.g., infinity)
+    if mse == 0:
+        return float('inf')
+    
+    # Calculate the PSNR using the formula: PSNR = 10 * log10(MAX^2 / MSE)
+    max_pixel_value = 255  # Assuming pixel values range from 0 to 255 (8-bit images)
+    psnr = 10 * math.log10((max_pixel_value ** 2) / mse)
+    return psnr
+    
 
 
 # ---------------------------------------
