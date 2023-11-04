@@ -82,7 +82,6 @@ class Trainer:
             hr = tf.cast(hr, tf.float32)
 
             sr = self.checkpoint.model(lr, training=True)
-            print(lr,hr,sr)
             loss_value = self.loss(hr, sr)
             
 
