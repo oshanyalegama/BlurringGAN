@@ -48,7 +48,6 @@ class Trainer:
 
         for lr, hr in train_dataset.take(steps - ckpt.step.numpy()):
             ckpt.step.assign_add(1)
-            print('step done')
             step = ckpt.step.numpy()
             
             loss = self.train_step(lr, hr)
