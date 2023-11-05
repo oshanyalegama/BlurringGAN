@@ -69,7 +69,7 @@ def denormalize_m11(x):
 
 def psnr(x1, x2):
     # Get the shape of x1
-    shape_x1 = tf.shape(x1)
+    shape_x1 = x1.shape
     
     # Crop or resize x2 to match the shape of x1
     x2_adjusted = tf.image.resize(x2, (shape_x1[1], shape_x1[2]))
