@@ -78,8 +78,8 @@ class Trainer:
     @tf.function
     def train_step(self, lr, hr):
         with tf.GradientTape() as tape:
-           # lr = tf.cast(lr, tf.float32)
-           # hr = tf.cast(hr, tf.float32)
+            lr = tf.cast(lr, tf.float32)
+            hr = tf.cast(hr, tf.float32)
 
             sr = self.checkpoint.model(lr, training=True)
             loss_value = self.loss(hr, sr)
