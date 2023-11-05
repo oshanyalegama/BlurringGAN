@@ -67,8 +67,6 @@ def denormalize_m11(x):
 
 # Ensure both images have the same shape and data type
 def psnr(x1, x2):
-    if x1.shape.as_list() != x2.shape.as_list():
-        x1 = tf.image.resize(x1, [x2.shape[1], x2.shape[2]])
     return tf.image.psnr(x1, x2, max_val=255)
 
 
