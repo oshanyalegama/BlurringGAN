@@ -66,8 +66,24 @@ def denormalize_m11(x):
 #     return tf.image.psnr(x1, x2, max_val=255)
 
 # Ensure both images have the same shape and data type
+
 def psnr(x1, x2):
-    return tf.image.psnr(x1, x2, max_val=255)
+    # Get the shapes of x1 and x2
+    shape_x1 = tf.shape(x1)
+    shape_x2 = tf.shape(x2)
+    
+    # Ensure that the shapes are broadcastable
+    # You can use broadcasting rules to make them compatible
+    max_shape = tf.maximum(shape_x1, shape_x2)
+    
+    # Broadcast both x1 and x2 to the max_shape
+    x1_broadcasted = tf.broadcast_to(x1, max_shape)
+    x2_broadcasted = tf.broadcast_to(x2, max_shape)
+    
+    # Calculate PSNR with the adjusted tensors
+    psnr_value = tf.image.psnr(x1_broadcasted, x2_broadcasted, max_val=255)
+    
+    return psnr_value
 
 
 # ---------------------------------------
